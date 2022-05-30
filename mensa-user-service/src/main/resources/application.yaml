@@ -1,0 +1,25 @@
+quarkus:
+  datasource:
+    db-kind: postgresql
+    username: mensa
+    password: mensa
+    jdbc:
+      url: jdbc:postgresql://db:5432/mensa
+  flyway:
+    baseline-on-migrate: true
+    migrate-at-start: true
+    schemas: mensa_user
+  hibernate-orm:
+    database:
+      default-schema: mensa_user
+  log:
+    console:
+      format: "%d{yyyy-MM-dd HH:mm:ss,S} %-5p %X{correlationId} - [%c{3.}] (%t) %s%e%n"
+    category:
+      "com.hillayes":
+        level: DEBUG
+
+mensa:
+  events:
+    group: user
+    listener-threads: 5

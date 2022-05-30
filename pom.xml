@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.hillayes</groupId>
+    <artifactId>mensa</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <description>Hillayes Mensa</description>
+    <url>http://www.hillayes.co.uk/hillayes/mensa</url>
+    <inceptionYear>2022</inceptionYear>
+    <organization>
+        <name>Hillayes UK</name>
+        <url>http://www.hillayes.co.uk</url>
+    </organization>
+    <modules>
+        <module>mensa-user-service</module>
+        <module>mensa-email-service</module>
+        <module>mensa-events</module>
+        <module>mensa-exception</module>
+        <module>mensa-executors</module>
+    </modules>
+    <properties>
+        <compiler-plugin.version>3.8.1</compiler-plugin.version>
+        <failsafe.useModulePath>false</failsafe.useModulePath>
+        <maven.compiler.release>11</maven.compiler.release>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
+
+        <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
+        <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
+        <quarkus.platform.version>2.9.1.Final</quarkus.platform.version>
+
+        <quarkus.container-image.group>${project.parent.artifactId}</quarkus.container-image.group>
+        <quarkus.jib.jvm-additional-arguments>-agentlib:jdwp=transport=dt_socket\,server=y\,suspend=n\,address=*:5005</quarkus.jib.jvm-additional-arguments>
+
+        <mensa-exception-version>1.0.0-SNAPSHOT</mensa-exception-version>
+        <mensa-events-version>1.0.0-SNAPSHOT</mensa-events-version>
+        <mensa-executors-version>1.0.0-SNAPSHOT</mensa-executors-version>
+    </properties>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>${quarkus.platform.group-id}</groupId>
+                <artifactId>${quarkus.platform.artifact-id}</artifactId>
+                <version>${quarkus.platform.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>1.18.22</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.hillayes</groupId>
+                <artifactId>mensa-exception</artifactId>
+                <version>${mensa-exception-version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.hillayes</groupId>
+                <artifactId>mensa-events</artifactId>
+                <version>${mensa-events-version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.hillayes</groupId>
+                <artifactId>mensa-executors</artifactId>
+                <version>${mensa-executors-version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-container-image-jib</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>3.2.1</version>
+                <configuration>
+                    <to>
+                        <image>myimage</image>
+                    </to>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
