@@ -25,5 +25,6 @@ public class ExecutorConfiguration {
     @Builder.Default
     private ExecutorType executorType = ExecutorType.FIXED;
 
-    private int numberOfThreads;
+    @Builder.Default
+    private int numberOfThreads = 1;
 }

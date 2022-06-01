@@ -9,11 +9,13 @@ import com.hillayes.mensa.events.exceptions.EventPayloadDeserializationException
 import com.hillayes.mensa.events.exceptions.EventPayloadSerializationException;
 import com.hillayes.mensa.executors.correlation.Correlation;
 import lombok.Data;
+import lombok.ToString;
 
 import java.time.Instant;
 import java.util.UUID;
 
 @Data
+@ToString(exclude = "payload")
 public class EventPacket {
     private static final ObjectMapper MAPPER = new ObjectMapper()
         .registerModule(new JavaTimeModule())
