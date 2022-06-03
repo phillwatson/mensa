@@ -1,4 +1,4 @@
-package com.hillayes.mensa.events.user;
+package com.hillayes.mensa.events.events;
 
 import com.hillayes.mensa.events.domain.Event;
 import lombok.AllArgsConstructor;

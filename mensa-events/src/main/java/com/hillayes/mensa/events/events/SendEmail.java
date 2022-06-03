@@ -1,4 +1,4 @@
-package com.hillayes.mensa.events.user;
+package com.hillayes.mensa.events.events;
 
 import com.hillayes.mensa.events.domain.Event;
 import lombok.AllArgsConstructor;
@@ -7,19 +7,18 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
-import java.time.Instant;
 
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserCreated implements Event {
+public class SendEmail implements Event {
     @NotNull
-    private String username;
+    private String toAddress;
 
     @NotNull
-    private String email;
+    private String fromAddress;
 
     @NotNull
-    private Instant dateCreated;
+    private String templateId;
 }

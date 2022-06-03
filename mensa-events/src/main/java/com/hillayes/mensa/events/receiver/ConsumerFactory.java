@@ -103,7 +103,7 @@ public class ConsumerFactory {
     private void commitAcknowledgements() {
         Map<TopicPartition, OffsetAndMetadata> commitments = new HashMap<>();
         listeners.values().forEach(listener ->
-            commitments.putAll(listener.acknowledgements())
+            commitments.putAll(listener.pendingCommits())
         );
 
         if (!commitments.isEmpty()) {

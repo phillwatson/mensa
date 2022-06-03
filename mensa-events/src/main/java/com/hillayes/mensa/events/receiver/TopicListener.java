@@ -1,5 +1,6 @@
 package com.hillayes.mensa.events.receiver;
 
+import com.hillayes.mensa.events.domain.EventListener;
 import com.hillayes.mensa.events.domain.EventPacket;
 import com.hillayes.mensa.events.domain.Message;
 import com.hillayes.mensa.events.domain.Topic;
@@ -10,11 +11,11 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@RequiredArgsConstructor
 @Getter
 @Slf4j
 public class TopicListener {
@@ -25,6 +26,30 @@ public class TopicListener {
 
     private final Object commitmentLock = new Object();
     private Map<TopicPartition, OffsetAndMetadata> pendingCommits = new HashMap<>();
+
+    public TopicListener(Topic topic,
+                         ProcessorStrategy processor,
+                         AcknowledgementStrategy acknowledgementStrategy,
+                         FailureStrategy failureStrategy) {
+        this.topic = topic;
+        this.processor = processor;
+        this.acknowledgementStrategy = acknowledgementStrategy;
+        this.failureStrategy = failureStrategy;
+    }
+
+    public TopicListener(Topic topic, ProcessorStrategy processor) {
+        this(topic, processor,
+            new PeriodicAcknowledgement(Duration.ofSeconds(5)),
+            new RetryFailureStrategy(3));
+    }
+
+    public TopicListener(Topic topic, EventListener listener, int threadCount) {
+        this(topic, new ConcurrentTopicProcessor(listener, threadCount));
+    }
+
+    public TopicListener(Topic topic, EventListener listener) {
+        this(topic, listener, 1);
+    }
 
     public void stop() {
         log.debug("Shutting down [topic: {}]", topic);
@@ -41,7 +66,7 @@ public class TopicListener {
         }
     }
 
-    public Map<TopicPartition, OffsetAndMetadata> acknowledgements() {
+    protected Map<TopicPartition, OffsetAndMetadata> pendingCommits() {
         synchronized (commitmentLock) {
             Map<TopicPartition, OffsetAndMetadata> result = pendingCommits;
             pendingCommits = new HashMap<>();

@@ -2,8 +2,8 @@ package com.hillayes.mensa.user.events;
 
 import com.hillayes.mensa.events.domain.Topic;
 import com.hillayes.mensa.events.sender.EventSender;
-import com.hillayes.mensa.events.user.UserCreated;
-import com.hillayes.mensa.events.user.UserOnboarded;
+import com.hillayes.mensa.events.events.UserCreated;
+import com.hillayes.mensa.events.events.UserOnboarded;
 import com.hillayes.mensa.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
