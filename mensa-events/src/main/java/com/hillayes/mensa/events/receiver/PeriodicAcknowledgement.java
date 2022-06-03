@@ -1,4 +1,4 @@
-package com.hillayes.mensa.events.listeners;
+package com.hillayes.mensa.events.receiver;
 
 import com.hillayes.mensa.events.domain.Message;
 import lombok.extern.slf4j.Slf4j;
@@ -34,16 +34,16 @@ public class PeriodicAcknowledgement implements AcknowledgementStrategy {
     }
 
     @Override
-    public boolean stop(TopicContext topicContext) {
-        log.debug("Stopping PeriodicAcknowledgement [topic: {}]", topicContext.getTopic());
+    public boolean stop(TopicListener topicListener) {
+        log.debug("Stopping PeriodicAcknowledgement [topic: {}]", topicListener.getTopic());
         boolean result = (schedule == null) || (schedule.cancel(false));
 
-        log.debug("Stopped PeriodicAcknowledgement [topic: {}, result: {}]", topicContext.getTopic(), result);
+        log.trace("Stopped PeriodicAcknowledgement [topic: {}, result: {}]", topicListener.getTopic(), result);
         return result;
     }
 
     @Override
-    public void received(TopicContext topicContext, Message message) {
+    public void received(TopicListener topicListener, Message message) {
         log.debug("Acknowledgement pending [topic-partition: {}, offset: {}]",
             message.getTopicPartition(), message.getRecord().offset());
 
@@ -55,7 +55,7 @@ public class PeriodicAcknowledgement implements AcknowledgementStrategy {
     }
 
     @Override
-    public void ack(TopicContext topicContext, Message message) {
+    public void ack(TopicListener topicListener, Message message) {
         log.debug("Acknowledgement received [topic-partition: {}, offset: {}]",
             message.getTopicPartition(), message.getRecord().offset());
 
@@ -65,17 +65,17 @@ public class PeriodicAcknowledgement implements AcknowledgementStrategy {
             acked.computeIfAbsent(partition, topic -> new HashSet<>()).add(offset);
 
             if (schedule == null) {
-                schedule(topicContext);
+                schedule(topicListener);
             }
         }
     }
 
-    private void schedule(final TopicContext topicContext) {
+    private void schedule(final TopicListener topicListener) {
         log.debug("Adding acknowledgment schedule");
 
         schedule = scheduler.scheduleAtFixedRate(() -> {
-            log.debug("Scheduled acknowledgement running [topic: {}]", topicContext.getTopic());
-            Map<TopicPartition, OffsetAndMetadata> queued = new HashMap<>();
+            log.trace("Scheduled acknowledgement running [topic: {}]", topicListener.getTopic());
+            final Map<TopicPartition, OffsetAndMetadata> queued = new HashMap<>();
 
             synchronized (pending) {
                 acked.forEach((partition, offsets) -> {
@@ -96,9 +96,9 @@ public class PeriodicAcknowledgement implements AcknowledgementStrategy {
             }
 
             if (!queued.isEmpty()) {
-                log.debug("Committing offsets: {}", queued);
-                topicContext.commit(queued);
-                log.debug("Committed offsets");
+                log.debug("Posting offset commitments: {}", queued);
+                topicListener.commit(queued);
+                log.trace("Posted offset commitments");
             }
         }, period.toMillis(), period.toMillis(), TimeUnit.MILLISECONDS);
     }

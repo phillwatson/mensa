@@ -1,4 +1,4 @@
-package com.hillayes.mensa.events.listeners;
+package com.hillayes.mensa.events.receiver;
 
 import com.hillayes.mensa.events.domain.EventListener;
 import com.hillayes.mensa.events.domain.EventPacket;
@@ -26,7 +26,7 @@ public class ConcurrentTopicProcessor implements ProcessorStrategy {
     }
 
     @Override
-    public void process(TopicContext context, Message message) {
+    public void process(TopicListener topicListener, final Message message) {
         if (executorService == null) {
             String topic = message.getTopicPartition().topic();
             executorService = ExecutorFactory.newExecutor(ExecutorConfiguration.builder()
@@ -36,7 +36,7 @@ public class ConcurrentTopicProcessor implements ProcessorStrategy {
                 .build());
         }
 
-        ConsumerRecord<String, EventPacket> record = message.getRecord();
+        final ConsumerRecord<String, EventPacket> record = message.getRecord();
         if (log.isDebugEnabled()) {
             log.trace("Submitting event for processing [topic: {}, partition: {}, offset: {}, payloadClass: {}, correlationId: {}]",
                 record.topic(), record.partition(), record.offset(),
@@ -61,15 +61,20 @@ public class ConcurrentTopicProcessor implements ProcessorStrategy {
     }
 
     @Override
-    public boolean stop(TopicContext topicContext) throws InterruptedException {
-        log.info("Shutting down processor [topic: {}]", topicContext.getTopic());
+    public boolean stop(TopicListener topicListener) {
+        log.debug("Shutting down processor [topic: {}]", topicListener.getTopic());
         if (executorService != null) {
             executorService.shutdown();
         }
 
-        boolean result = (executorService == null) || (executorService.awaitTermination(20, TimeUnit.SECONDS));
-        log.info("Shutting down processor [topic: {}, result: {}]", topicContext.getTopic(), result);
+        boolean result = false;
+        try {
+            result = (executorService == null) || (executorService.awaitTermination(20, TimeUnit.SECONDS));
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
 
+        log.trace("Shutting down processor [topic: {}, result: {}]", topicListener.getTopic(), result);
         return result;
     }
 }

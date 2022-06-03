@@ -1,6 +1,6 @@
 package com.hillayes.mensa.events.config;
 
-import com.hillayes.mensa.events.reciever.EventPacketDeserializer;
+import com.hillayes.mensa.events.receiver.EventPacketDeserializer;
 import com.hillayes.mensa.events.sender.EventPacketSerializer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;

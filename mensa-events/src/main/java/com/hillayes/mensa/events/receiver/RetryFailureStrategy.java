@@ -1,4 +1,4 @@
-package com.hillayes.mensa.events.listeners;
+package com.hillayes.mensa.events.receiver;
 
 import com.hillayes.mensa.events.domain.Message;
 import lombok.extern.slf4j.Slf4j;
@@ -6,11 +6,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RetryFailureStrategy implements FailureStrategy {
     public RetryFailureStrategy(int retryCount) {
-
     }
 
     @Override
-    public void failure(TopicContext topicContext, Message message) {
+    public void failure(TopicListener topicListener, Message message) {
         if (log.isDebugEnabled()) {
             log.debug("Message explicitly failed [topic-partition: {}, offset: {}, eventPacket: {}]",
                 message.getTopicPartition(), message.getRecord().offset(),
@@ -19,7 +18,7 @@ public class RetryFailureStrategy implements FailureStrategy {
     }
 
     @Override
-    public void failure(TopicContext topicContext, Message message, Throwable cause) {
+    public void failure(TopicListener topicListener, Message message, Throwable cause) {
         log.error("Message implicitly failed [topic-partition: {}, offset: {}, eventPacket: {}]",
             message.getTopicPartition(), message.getRecord().offset(),
             message.getRecord().value());
@@ -27,10 +26,10 @@ public class RetryFailureStrategy implements FailureStrategy {
     }
 
     @Override
-    public boolean stop(TopicContext topicContext) throws InterruptedException {
-        log.debug("Stopped RetryFailureStrategy [topic: {}]", topicContext.getTopic());
+    public boolean stop(TopicListener topicListener) {
+        log.debug("Stopped RetryFailureStrategy [topic: {}]", topicListener.getTopic());
         boolean result = true;
-        log.debug("Stopped RetryFailureStrategy [topic: {}, result: {}]", topicContext.getTopic(), result);
+        log.trace("Stopped RetryFailureStrategy [topic: {}, result: {}]", topicListener.getTopic(), result);
         return result;
     }
 }

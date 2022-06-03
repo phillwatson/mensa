@@ -1,71 +1,60 @@
 package com.hillayes.mensa.email.events;
 
 import com.hillayes.mensa.email.service.EmailService;
-import com.hillayes.mensa.events.config.ConsumerBean;
 import com.hillayes.mensa.events.domain.EventPacket;
 import com.hillayes.mensa.events.domain.Topic;
-import com.hillayes.mensa.events.listeners.ConcurrentTopicProcessor;
-import com.hillayes.mensa.events.listeners.PeriodicAcknowledgement;
-import com.hillayes.mensa.events.listeners.RetryFailureStrategy;
-import com.hillayes.mensa.events.listeners.TopicConsumer;
+import com.hillayes.mensa.events.receiver.ConcurrentTopicProcessor;
+import com.hillayes.mensa.events.receiver.ConsumerFactory;
+import com.hillayes.mensa.events.receiver.PeriodicAcknowledgement;
+import com.hillayes.mensa.events.receiver.RetryFailureStrategy;
+import com.hillayes.mensa.events.receiver.TopicListener;
 import com.hillayes.mensa.events.user.UserCreated;
 import com.hillayes.mensa.events.user.UserOnboarded;
-import io.quarkus.runtime.ShutdownEvent;
 import io.quarkus.runtime.StartupEvent;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.enterprise.event.Observes;
 import javax.inject.Singleton;
 import java.time.Duration;
-import java.util.Properties;
 
 @Singleton
+@RequiredArgsConstructor
 @Slf4j
 public class Receivers {
-    private final Properties consumerConfig;
+    private final ConsumerFactory consumerFactory;
     private final EmailService emailService;
-
-    public Receivers(@ConsumerBean Properties consumerConfig,
-                     EmailService emailService) {
-        this.consumerConfig = consumerConfig;
-        this.emailService = emailService;
-    }
-
-    private TopicConsumer userCreatedConsumer;
-    private TopicConsumer userOnboardedConsumer;
 
     void onStart(@Observes StartupEvent ev) {
         log.info("Adding event listeners");
 
-        userCreatedConsumer = new TopicConsumer(Topic.USER_CREATED, consumerConfig,
-            new PeriodicAcknowledgement(Duration.ofSeconds(10)),
-            new RetryFailureStrategy(3),
-            new ConcurrentTopicProcessor((EventPacket event) -> {
-                log.info("Received UserCreated event [correlationId: {}, timestamp: {}]",
-                    event.getCorrelationId(), event.getTimestamp());
+        consumerFactory.addTopicListener(
+            new TopicListener(
+                Topic.USER_CREATED,
+                new ConcurrentTopicProcessor((EventPacket event) -> {
+                    UserCreated payload = event.getPayloadContent();
+                    log.info("Received UserCreated event [correlationId: {}, timestamp: {}, username: {}]",
+                        event.getCorrelationId(), event.getTimestamp(), payload.getUsername());
 
-                UserCreated payload = event.getPayloadContent();
-                log.info("Received UserCreated event [username: {}]", payload.getUsername());
+                    emailService.sendEmail(payload);
+                }, 1),
+                new PeriodicAcknowledgement(Duration.ofSeconds(10)),
+                new RetryFailureStrategy(3)
+            )
+        );
 
-                emailService.sendEmail(payload);
-            }, 1));
+        consumerFactory.addTopicListener(
+            new TopicListener(Topic.USER_ONBOARDED,
+                new ConcurrentTopicProcessor((EventPacket event) -> {
+                    UserOnboarded payload = event.getPayloadContent();
+                    log.info("Received UserOnboarded event [correlationId: {}, timestamp: {}, username: {}]",
+                        event.getCorrelationId(), event.getTimestamp(), payload.getUsername());
 
-        userOnboardedConsumer = new TopicConsumer(Topic.USER_ONBOARDED, consumerConfig,
-            new PeriodicAcknowledgement(Duration.ofSeconds(10)),
-            new RetryFailureStrategy(3),
-            new ConcurrentTopicProcessor((EventPacket event) -> {
-                log.info("Received UserOnboarded event [correlationId: {}, timestamp: {}]",
-                    event.getCorrelationId(), event.getTimestamp());
-
-                UserOnboarded payload = event.getPayloadContent();
-                log.info("Received UserOnboarded event [username: {}]", payload.getUsername());
-
-                emailService.sendEmail(payload);
-            }, 1));
-    }
-
-    void onStop(@Observes ShutdownEvent ev) throws InterruptedException {
-        userCreatedConsumer.stop();
-        userOnboardedConsumer.stop();
+                    emailService.sendEmail(payload);
+                }, 1),
+                new PeriodicAcknowledgement(Duration.ofSeconds(10)),
+                new RetryFailureStrategy(3)
+            )
+        );
     }
 }
