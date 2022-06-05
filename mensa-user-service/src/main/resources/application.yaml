@@ -22,4 +22,3 @@ quarkus:
 mensa:
   events:
     group: user
-    listener-threads: 5

@@ -5,6 +5,12 @@ quarkus:
     password: mensa
     jdbc:
       url: jdbc:postgresql://db:5432/mensa
+"%test":
+  quarkus:
+    datasource:
+      jdbc:
+        url: jdbc:postgresql://localhost:5432/mensa
+
   flyway:
     baseline-on-migrate: true
     migrate-at-start: true
@@ -22,7 +28,6 @@ quarkus:
 mensa:
   events:
     group: email
-    listener-threads: 5
 
   emails:
     user-created:
