@@ -15,9 +15,11 @@ quarkus:
     baseline-on-migrate: true
     migrate-at-start: true
     schemas: mensa_email
+
   hibernate-orm:
     database:
       default-schema: mensa_email
+
   log:
     console:
       format: "%d{yyyy-MM-dd HH:mm:ss,S} %-5p %X{correlationId} - [%c{3.}] (%t) %s%e%n"
