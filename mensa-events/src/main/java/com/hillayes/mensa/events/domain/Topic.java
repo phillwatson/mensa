@@ -6,7 +6,9 @@ import java.util.stream.Collectors;
 
 public enum Topic {
     USER_CREATED,
-    USER_ONBOARDED;
+    USER_ONBOARDED,
+    USER_UPDATED,
+    USER_DELETED;
 
     public String topicName() {
         return name().toLowerCase();
