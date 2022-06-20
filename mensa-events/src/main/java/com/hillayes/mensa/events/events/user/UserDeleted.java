@@ -1,4 +1,4 @@
-package com.hillayes.mensa.events.events;
+package com.hillayes.mensa.events.events.user;
 
 import com.hillayes.mensa.events.domain.Event;
 import lombok.AllArgsConstructor;
@@ -13,7 +13,7 @@ import java.time.Instant;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserUpdated implements Event {
+public class UserDeleted implements Event {
     @NotNull
     private String username;
 

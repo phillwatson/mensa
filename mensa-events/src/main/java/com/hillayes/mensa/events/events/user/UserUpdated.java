@@ -1,4 +1,4 @@
-package com.hillayes.mensa.events.events;
+package com.hillayes.mensa.events.events.user;
 
 import com.hillayes.mensa.events.domain.Event;
 import lombok.AllArgsConstructor;
@@ -13,7 +13,7 @@ import java.time.Instant;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserOnboarded implements Event {
+public class UserUpdated {
     @NotNull
     private String username;
 

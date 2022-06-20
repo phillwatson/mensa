@@ -14,11 +14,11 @@ quarkus:
   flyway:
     baseline-on-migrate: true
     migrate-at-start: true
-    schemas: mensa_email
+    schemas: email
 
   hibernate-orm:
     database:
-      default-schema: mensa_email
+      default-schema: email
 
   log:
     console:

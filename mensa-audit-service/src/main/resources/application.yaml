@@ -1,0 +1,15 @@
+quarkus:
+  mongodb:
+    connection-string: mongodb://root:example@mongo:27017
+    database: mensa-audit
+
+  log:
+    console:
+      format: "%d{yyyy-MM-dd HH:mm:ss,S} %-5p %X{correlationId} - [%c{3.}] (%t) %s%e%n"
+    category:
+      "com.hillayes":
+        level: DEBUG
+
+mensa:
+  events:
+    group: audit

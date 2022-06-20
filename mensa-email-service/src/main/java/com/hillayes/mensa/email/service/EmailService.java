@@ -1,7 +1,7 @@
 package com.hillayes.mensa.email.service;
 
-import com.hillayes.mensa.events.events.UserCreated;
-import com.hillayes.mensa.events.events.UserOnboarded;
+import com.hillayes.mensa.events.events.user.UserCreated;
+import com.hillayes.mensa.events.events.user.UserOnboarded;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

@@ -5,7 +5,6 @@ import com.hillayes.mensa.events.domain.EventPacket;
 import com.hillayes.mensa.events.domain.Message;
 import com.hillayes.mensa.events.domain.Topic;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
