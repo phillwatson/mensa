@@ -11,19 +11,29 @@ public enum Topic {
     USER_UPDATED("User profile has been updated."),
     USER_DELETED("User profile has been deleted."),
 
-    PAYOUT_CREATED("Payout has been created, and awaits acceptance into system."),
+    PAYOUT_INSTRUCTED("Payout has been submitted by the payor."),
+    PAYOUT_CONFIRMED("Payout has been been confirmed."),
+    PAYOUT_INCOMPLETE("Payout is incomplete."),
+    PAYOUT_COMPLETED("Payout has been completed."),
+    PAYOUT_SUBMITTED("Payout has been submitted."),
     PAYOUT_ACCEPTED("Payout has been accepted, and awaits approval or rejection."),
-    PAYOUT_APPROVED("Payout has been approved."),
     PAYOUT_REJECTED("Payout has been rejected."),
-    PAYOUT_COMPLETE("Payout has been completed after approval."),
-    PAYOUT_RETURNED("Payout has been returned after rejection."),
+    PAYOUT_QUOTED("Payout has been quoted by the exchange."),
+    PAYOUT_WITHDRAWN("Payout has been been withdrawn/cancelled."),
 
-    PAYMENT_CREATED("Payment has been created, and awaits acceptance into system."),
+    PAYMENT_BANK_PAYMENT_REQUESTED("Payment has been requested by the payee."),
+    PAYMENT_ACCEPTED_BY_RAILS("Payment has been accepted, and awaits approval or rejection."),
+    PAYMENT_CONFIRMED("Payment has been confirmed."),
+    PAYMENT_RETURNED("Payment has been returned after rejection."),
+    PAYMENT_SUBMITTED("Payment has been submitted."),
+    PAYMENT_CANCELLED("Payment has been cancelled."),
     PAYMENT_ACCEPTED("Payment has been accepted, and awaits approval or rejection."),
-    PAYMENT_APPROVED("Payment has been approved."),
     PAYMENT_REJECTED("Payment has been rejected."),
-    PAYMENT_COMPLETE("Payment has been completed after approval."),
-    PAYMENT_RETURNED("Payment has been returned after rejection.");
+    PAYMENT_AWAITING_FUNDS("Payment is awaiting funds."),
+    PAYMENT_FUNDED("Payment has been funded."),
+    PAYMENT_UNFUNDED("Payment funds are not available."),
+    PAYMENT_WITHDRAWN("Payment has been withdrawn by rails service."),
+    PAYMENT_FAILED("Payment has marked as failed by rails service.");
 
     private String summary;
 

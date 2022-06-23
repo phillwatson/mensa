@@ -6,6 +6,7 @@ version: '3'
 volumes:
   db-data:
   mongo-data:
+  neo4j-data:
 
 networks:
   mensa-db-network:
@@ -72,16 +73,17 @@ services:
         max-size: "500k"
         max-file: "1"
 
-  # docker exec -it mensa-mongo-1 mongo -u root -p example
+  # docker exec -it mensa-mongo-1 mongo -u mensa -p mensa
   # use mensa-audit
   # show collections
-  # db.PayoutEvent.find()
+  # db.payout.find().pretty
+  # db.payment.find().pretty
   mongo:
     restart: unless-stopped
     image: mongo:5.0.9
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_ROOT_USERNAME: mensa
+      MONGO_INITDB_ROOT_PASSWORD: mensa
     networks:
       - mensa-db-network
     ports:
@@ -90,6 +92,33 @@ services:
       - type: volume
         source: mongo-data
         target: /data/db
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "500k"
+        max-file: "1"
+
+  # docker exec -it mensa-neo4j-1 cypher-shell -u mensa -p mensa
+  # match (n:Actors)-[r]->(m:Movies) return n.name AS Actors, m.title AS Movies, m.year AS MovieYear;
+  neo4j:
+    restart: unless-stopped
+    image: neo4j:4.4.8
+    environment:
+      NEO4J_AUTH: neo4j/mensa
+    networks:
+      - mensa-db-network
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - type: volume
+        source: neo4j-data
+        target: /data
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "500k"
+        max-file: "1"
 
   audit:
     restart: unless-stopped
@@ -98,7 +127,10 @@ services:
       - mongo
       - kafka
     environment:
-      QUARKUS_MONGODB_CONNECTION-STRING: mongodb://root:example@mongo:27017
+      MONGODB_CONNECTION: mongodb://mensa:mensa@mongo:27017
+      NEO4J_HOST: bolt://neo4j:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: mensa
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     networks:
       - mensa-db-network

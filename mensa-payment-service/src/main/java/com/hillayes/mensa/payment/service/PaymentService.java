@@ -1,13 +1,12 @@
 package com.hillayes.mensa.payment.service;
 
+import com.hillayes.mensa.events.domain.Topic;
 import com.hillayes.mensa.payment.domain.Payment;
-import com.hillayes.mensa.payment.domain.Payout;
 import com.hillayes.mensa.payment.events.PaymentEventSender;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.enterprise.context.ApplicationScoped;
-
 import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
@@ -22,7 +21,7 @@ public class PaymentService {
         log.info("Creating payment [payeeId: {}, memo: {}]", payment.getPayeeId(), payment.getMemo());
 
         payment.setPaymentId(randomUUID());
-        paymentEventSender.sendPaymentCreated(payment);
+        paymentEventSender.sendPayment(payment);
 
         log.debug("Created payment [paymentId: {}, payeeId: {}, memo: {}]",
             payment.getPaymentId(), payment.getPayeeId(), payment.getMemo());
@@ -33,8 +32,8 @@ public class PaymentService {
         log.info("Updating payment [paymentId: {}, payeeId: {}, memo: {}]",
             id, payment.getPayeeId(), payment.getMemo());
 
-        payment.setPayoutId(id);
-        paymentEventSender.sendPaymentAccepted(payment);
+        payment.setPaymentId(id);
+        paymentEventSender.sendPayment(payment);
 
         log.debug("Updated payment [paymentId: {}, payeeId: {}, memo: {}]",
             payment.getPaymentId(), payment.getPayeeId(), payment.getMemo());

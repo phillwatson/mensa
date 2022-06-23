@@ -1,6 +1,5 @@
 package com.hillayes.mensa.events.sender;
 
-import com.hillayes.mensa.events.domain.Event;
 import com.hillayes.mensa.events.domain.EventPacket;
 import com.hillayes.mensa.events.domain.Topic;
 import lombok.RequiredArgsConstructor;

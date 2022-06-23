@@ -1,4 +1,4 @@
-package com.hillayes.mensa.events.events.payment;
+package com.hillayes.mensa.auditor.domain;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AccessLevel;
@@ -16,14 +16,12 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class PaymentEvent {
+public class SourceAccountInfo {
     @EqualsAndHashCode.Include
-    private UUID paymentId; // primary key
-    private UUID payoutId; // foreign key to payout.payoutId
-    private UUID batchId; // foreign key to batch.batchId
-    private UUID payeeId; // foreign key to PayeeInfo.payeeId
-    private String memo;
-    private String sourceCurrency;
-    private Long sourceAmount;
-    private String status;
+    private UUID sourceAccountId; // primary key
+    private String name;
+    private UUID payorId; // foreign key to PayorInfo.payorId
+    private String fundingRef;
+    private Long lastUpdatedDateTime;
+    private String currency;
 }

@@ -2,7 +2,6 @@ package com.hillayes.mensa.payment.resource;
 
 import com.hillayes.mensa.exception.common.MissingParameterException;
 import com.hillayes.mensa.payment.domain.Payment;
-import com.hillayes.mensa.payment.domain.Payout;
 import com.hillayes.mensa.payment.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

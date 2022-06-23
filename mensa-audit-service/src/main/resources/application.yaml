@@ -1,7 +1,13 @@
 quarkus:
   mongodb:
-    connection-string: mongodb://root:example@mongo:27017
+    connection-string: ${MONGODB_CONNECTION}
     database: mensa-audit
+
+  neo4j:
+    uri: ${NEO4J_HOST}
+    authentication:
+      username: ${NEO4J_USER}
+      password: ${NEO4J_PASSWORD}
 
   log:
     console:

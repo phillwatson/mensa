@@ -27,8 +27,15 @@ public class Receivers {
 
         List.of(
             // send the following events to the same service method
-            Topic.PAYOUT_CREATED, Topic.PAYOUT_ACCEPTED, Topic.PAYOUT_APPROVED,
-            Topic.PAYOUT_REJECTED, Topic.PAYOUT_COMPLETE, Topic.PAYOUT_RETURNED
+            Topic.PAYOUT_INSTRUCTED,
+            Topic.PAYOUT_CONFIRMED,
+            Topic.PAYOUT_INCOMPLETE,
+            Topic.PAYOUT_COMPLETED,
+            Topic.PAYOUT_SUBMITTED,
+            Topic.PAYOUT_ACCEPTED,
+            Topic.PAYOUT_REJECTED,
+            Topic.PAYOUT_QUOTED,
+            Topic.PAYOUT_WITHDRAWN
         ).forEach(topic ->
             consumerFactory.addTopicListener(
                 new TopicListener(topic, (EventPacket event) -> {
@@ -43,8 +50,19 @@ public class Receivers {
 
         List.of(
             // send the following events to the same service method
-            Topic.PAYMENT_CREATED, Topic.PAYMENT_ACCEPTED, Topic.PAYMENT_APPROVED,
-            Topic.PAYMENT_REJECTED, Topic.PAYMENT_COMPLETE, Topic.PAYMENT_RETURNED
+            Topic.PAYMENT_BANK_PAYMENT_REQUESTED,
+            Topic.PAYMENT_ACCEPTED_BY_RAILS,
+            Topic.PAYMENT_CONFIRMED,
+            Topic.PAYMENT_RETURNED,
+            Topic.PAYMENT_SUBMITTED,
+            Topic.PAYMENT_CANCELLED,
+            Topic.PAYMENT_ACCEPTED,
+            Topic.PAYMENT_REJECTED,
+            Topic.PAYMENT_AWAITING_FUNDS,
+            Topic.PAYMENT_FUNDED,
+            Topic.PAYMENT_UNFUNDED,
+            Topic.PAYMENT_WITHDRAWN,
+            Topic.PAYMENT_FAILED
         ).forEach(topic ->
             consumerFactory.addTopicListener(
                 new TopicListener(topic, (EventPacket event) -> {

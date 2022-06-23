@@ -13,9 +13,9 @@ import org.bson.codecs.configuration.CodecRegistry;
 
 import java.util.UUID;
 
-public abstract class BaseRepository<T> implements PanacheMongoRepositoryBase<T, UUID> {
+public abstract class BaseMongoRepository<T> implements PanacheMongoRepositoryBase<T, UUID> {
 
-    protected BaseRepository() {
+    protected BaseMongoRepository() {
         CodecRegistries.fromRegistries(
             // Put a UuidCodec with representation specified in the first provider, which
             // will override the default one with no representation specified
@@ -23,7 +23,7 @@ public abstract class BaseRepository<T> implements PanacheMongoRepositoryBase<T,
             MongoClientSettings.getDefaultCodecRegistry());
     }
 
-    protected  <T> BsonDocument encode(T instance) {
+    protected <T> BsonDocument encode(T instance) {
         CodecRegistry codecRegistry = mongoCollection().getCodecRegistry();
         Codec<T> codec = (Codec<T>) codecRegistry.get(instance.getClass());
 

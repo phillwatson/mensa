@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Data
@@ -23,4 +24,9 @@ public class PayoutEvent {
     private UUID payoutFromPayorId; // foreign key to PayorInfo.payorId
     private UUID payoutToPayorId; // foreign key to PayorInfo.payorId
     private String payoutMemo;
+    private String status;
+    private Instant submittedDateTime;
+    private Instant quotedDateTime;
+    private Instant instructedDateTime;
+    private Instant withdrawnDateTime;
 }
