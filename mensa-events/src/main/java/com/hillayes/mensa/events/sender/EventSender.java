@@ -1,6 +1,5 @@
 package com.hillayes.mensa.events.sender;
 
-import com.hillayes.mensa.events.domain.Event;
 import com.hillayes.mensa.events.domain.EventPacket;
 import com.hillayes.mensa.events.domain.Topic;
 import lombok.RequiredArgsConstructor;
@@ -17,14 +16,18 @@ import java.util.concurrent.Future;
 public class EventSender {
     private final ProducerFactory producerFactory;
 
-    public <T extends Event> Future<RecordMetadata> send(Topic topic, T event)  {
+    public <T> Future<RecordMetadata> send(Topic topic, T event)  {
         log.debug("Sending event [topic: {}, class: {}]", topic, event.getClass().getName());
 
         EventPacket eventPacket = new EventPacket(event);
-        return send(topic, null, eventPacket);
+        return send(topic, eventPacket);
     }
 
-    private Future<RecordMetadata> send(Topic topic, String key, EventPacket value) {
+    public Future<RecordMetadata> send(Topic topic, EventPacket value) {
+        return send(topic, null, value);
+    }
+
+    public Future<RecordMetadata> send(Topic topic, String key, EventPacket value) {
         ProducerRecord<String, EventPacket> record = new ProducerRecord<>(topic.topicName(), key, value);
         return producerFactory.getProducer().send(record);
     }

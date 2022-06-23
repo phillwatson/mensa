@@ -6,10 +6,12 @@ import com.hillayes.mensa.user.events.UserEventSender;
 import com.hillayes.mensa.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.BadRequestException;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,7 +33,7 @@ public class UserService {
 
         userEventSender.sendUserCreated(user);
 
-        log.info("Created user [username: {}, id: {}]", user.getUsername(), user.getId());
+        log.debug("Created user [username: {}, id: {}]", user.getUsername(), user.getId());
         return user;
     }
 
@@ -48,7 +50,7 @@ public class UserService {
                 User result = userRepository.save(user);
 
                 userEventSender.sendUserOnboarded(result);
-                log.info("Onboarded user [username: {}, id: {}]", result.getUsername(), result.getId());
+                log.debug("Onboarded user [username: {}, id: {}]", result.getUsername(), result.getId());
                 return result;
             });
     }
@@ -57,7 +59,45 @@ public class UserService {
         log.info("Retrieving user [id: {}]", id);
         Optional<User> result = userRepository.findById(id);
 
-        log.info("Retrieved user [id: {}, found: {}]", id, result.isPresent());
+        log.debug("Retrieved user [id: {}, found: {}]", id, result.isPresent());
         return result;
+    }
+
+    public Collection<User> listUsers() {
+        log.info("Retrieving users");
+        Collection<User> result = userRepository.findAll(Sort.by("username").ascending());
+
+        log.debug("Retrieved users [size: {}]", result.size());
+        return result;
+    }
+
+    public Optional<User> updateUser(UUID id, User modifiedUser) {
+        log.info("Updating user [id: {}]", id);
+
+        return userRepository.findById(id)
+            .map(user -> {
+                user.setEmail(modifiedUser.getEmail());
+                user.setGivenName(modifiedUser.getGivenName());
+                user.setFamilyName(modifiedUser.getFamilyName());
+                user.setPhoneNumber(modifiedUser.getPhoneNumber());
+                userRepository.save(user);
+
+                userEventSender.sendUserUpdated(user);
+                log.debug("Updated user [username: {}, id: {}]", user.getUsername(), user.getId());
+                return user;
+            });
+    }
+
+    public Optional<User> deleteUser(UUID id) {
+        log.info("Deleting user [id: {}]", id);
+
+        return userRepository.findById(id)
+            .map(user -> {
+                userRepository.delete(user);
+
+                userEventSender.sendUserDeleted(user);
+                log.debug("Deleted user [username: {}, id: {}]", user.getUsername(), user.getId());
+                return user;
+            });
     }
 }

@@ -1,0 +1,21 @@
+quarkus:
+  mongodb:
+    connection-string: ${MONGODB_CONNECTION}
+    database: mensa-audit
+
+  neo4j:
+    uri: ${NEO4J_HOST}
+    authentication:
+      username: ${NEO4J_USER}
+      password: ${NEO4J_PASSWORD}
+
+  log:
+    console:
+      format: "%d{yyyy-MM-dd HH:mm:ss,S} %-5p %X{correlationId} - [%c{3.}] (%t) %s%e%n"
+    category:
+      "com.hillayes":
+        level: DEBUG
+
+mensa:
+  events:
+    group: audit

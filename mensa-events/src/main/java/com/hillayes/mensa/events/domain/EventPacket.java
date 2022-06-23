@@ -29,7 +29,7 @@ public class EventPacket {
     protected EventPacket() {
     }
 
-    public EventPacket(Event payloadObject) {
+    public EventPacket(Object payloadObject) {
         correlationId = Correlation.getCorrelationId().orElse(UUID.randomUUID().toString());
         timestamp = Instant.now();
         payloadClass = payloadObject.getClass().getName();
@@ -42,7 +42,7 @@ public class EventPacket {
     }
 
     @JsonIgnore
-    public <T extends Event> T getPayloadContent() {
+    public <T> T getPayloadContent() {
         try {
             return (T) MAPPER.readValue(payload, Class.forName(payloadClass));
         } catch (JsonProcessingException | ClassNotFoundException e) {

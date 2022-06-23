@@ -43,8 +43,10 @@ public class ConsumerFactory {
     public void addTopicListener(TopicListener listener) {
         log.info("Adding message listener [topic: {}]", listener.getTopic());
 
-        listeners.put(listener.getTopic().topicName(), listener);
-        listenersAdded.set(true);
+        synchronized (listeners) {
+            listeners.put(listener.getTopic().topicName(), listener);
+            listenersAdded.set(true);
+        }
 
         ensureConsumerStarted();
     }
@@ -53,8 +55,11 @@ public class ConsumerFactory {
         if (consumer != null) {
             log.info("Shutting down Consumer - started");
 
-            listeners.forEach((topic, listener) -> listener.stop());
-            listeners.clear();
+            synchronized (listeners) {
+                commitAcknowledgements();
+                listeners.forEach((topic, listener) -> listener.stop());
+                listeners.clear();
+            }
 
             consumer.wakeup();
             boolean success = shutdownLatch.await(1, TimeUnit.MINUTES);
@@ -102,9 +107,11 @@ public class ConsumerFactory {
 
     private void commitAcknowledgements() {
         Map<TopicPartition, OffsetAndMetadata> commitments = new HashMap<>();
-        listeners.values().forEach(listener ->
-            commitments.putAll(listener.pendingCommits())
-        );
+        synchronized (listeners) {
+            listeners.values().forEach(listener ->
+                commitments.putAll(listener.pendingCommits())
+            );
+        }
 
         if (!commitments.isEmpty()) {
             log.debug("Issuing offset commitments: {}", commitments);

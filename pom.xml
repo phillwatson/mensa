@@ -20,8 +20,12 @@
         <module>mensa-events</module>
         <module>mensa-exception</module>
         <module>mensa-executors</module>
+        <module>mensa-audit-service</module>
+        <module>mensa-payment-service</module>
     </modules>
     <properties>
+        <maven.test.skip>true</maven.test.skip>
+
         <compiler-plugin.version>3.8.1</compiler-plugin.version>
         <failsafe.useModulePath>false</failsafe.useModulePath>
         <maven.compiler.release>11</maven.compiler.release>
@@ -33,14 +37,15 @@
 
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
-        <quarkus.platform.version>2.9.1.Final</quarkus.platform.version>
-
+        <quarkus.platform.version>2.9.2.Final</quarkus.platform.version>
+        <quarkus.container-image.build>true</quarkus.container-image.build>
         <quarkus.container-image.group>${project.parent.artifactId}</quarkus.container-image.group>
         <quarkus.jib.jvm-additional-arguments>-agentlib:jdwp=transport=dt_socket\,server=y\,suspend=n\,address=*:5005</quarkus.jib.jvm-additional-arguments>
 
         <mensa-exception-version>1.0.0-SNAPSHOT</mensa-exception-version>
         <mensa-events-version>1.0.0-SNAPSHOT</mensa-events-version>
         <mensa-executors-version>1.0.0-SNAPSHOT</mensa-executors-version>
+        <mensa-payment-service-version>1.0.0-SNAPSHOT</mensa-payment-service-version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -75,6 +80,12 @@
                 <groupId>com.hillayes</groupId>
                 <artifactId>mensa-executors</artifactId>
                 <version>${mensa-executors-version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.hillayes</groupId>
+                <artifactId>payment-service</artifactId>
+                <version>${mensa-payment-service-version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

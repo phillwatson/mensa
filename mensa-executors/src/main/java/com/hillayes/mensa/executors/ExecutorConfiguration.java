@@ -2,7 +2,6 @@ package com.hillayes.mensa.executors;
 
 import lombok.Builder;
 import lombok.Data;
-import lombok.ToString;
 
 /**
  * Records the configuration of one of many ExecutorServices created by the factory

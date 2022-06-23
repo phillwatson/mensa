@@ -1,6 +1,7 @@
 package com.hillayes.mensa.user.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -14,6 +15,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Version;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -23,6 +25,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class User {
     @Id
     @GeneratedValue(generator = "uuid2")
@@ -32,7 +35,6 @@ public class User {
     @Column(nullable = false)
     private String username;
 
-    @Setter
     @JsonIgnore
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
@@ -61,7 +63,9 @@ public class User {
     @Column(name = "date_onboarded")
     private Instant dateOnboarded;
 
-    private int version;
+    @Version
+    @JsonIgnore
+    private Integer version;
 
     @JsonIgnore
     public String getPasswordHash() {
