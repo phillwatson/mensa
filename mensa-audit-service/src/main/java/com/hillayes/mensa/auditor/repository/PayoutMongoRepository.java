@@ -34,13 +34,19 @@ public class PayoutMongoRepository extends BaseMongoRepository<Payout> {
             .withdrawnDateTime(payoutEvent.getWithdrawnDateTime())
             .build();
 
+        // use $set to update given columns
+        // encoding will ignore null values due to @JsonInclude(JsonInclude.Include.NON_NULL)
         BsonDocument updateDoc = new BsonDocument("$set", getDelta(payout));
+
+        // if event carries a status
         if (payout.getStatus() != null) {
+            // append (push) to the status history - as well as store in main body
             updateDoc.put("$push",
                 new BsonDocument("statusHistory",
                     encode(new Payout.StatusHistory(payout.getStatus(), Instant.now()))));
         }
 
+        // use upsert to create new or update existing record
         UpdateResult updateResult = mongoCollection()
             .updateOne(eq("_id", payout.getId()),
                 updateDoc, new UpdateOptions().upsert(true)

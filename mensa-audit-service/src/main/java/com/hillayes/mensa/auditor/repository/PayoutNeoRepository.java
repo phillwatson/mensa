@@ -9,6 +9,8 @@ import org.neo4j.driver.Values;
 
 import javax.enterprise.context.ApplicationScoped;
 
+import static com.hillayes.mensa.auditor.utils.DateUtils.toLocalDateTime;
+
 @ApplicationScoped
 @RequiredArgsConstructor
 @Slf4j
@@ -34,10 +36,10 @@ public class PayoutNeoRepository {
         ).withParameters(Values.parameters(
                 "payoutId", payoutEvent.getPayoutId().toString(),
                 "payorId", payoutEvent.getPayoutFromPayorId().toString(),
-                "submittedDateTime", payoutEvent.getSubmittedDateTime(),
-                "quotedDateTime", payoutEvent.getQuotedDateTime(),
-                "instructedDateTime", payoutEvent.getInstructedDateTime(),
-                "withdrawnDateTime", payoutEvent.getWithdrawnDateTime()
+                "submittedDateTime", toLocalDateTime(payoutEvent.getSubmittedDateTime()).orElse(null),
+                "quotedDateTime", toLocalDateTime(payoutEvent.getQuotedDateTime()).orElse(null),
+                "instructedDateTime", toLocalDateTime(payoutEvent.getInstructedDateTime()).orElse(null),
+                "withdrawnDateTime", toLocalDateTime(payoutEvent.getWithdrawnDateTime()).orElse(null)
             )
         );
 
