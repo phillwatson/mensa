@@ -26,6 +26,9 @@ public class EventPacket {
     private String payloadClass;
     private String payload;
 
+    @JsonIgnore
+    private Object payloadContent;
+
     protected EventPacket() {
     }
 
@@ -41,12 +44,22 @@ public class EventPacket {
         }
     }
 
+    public EventPacket(String payloadClass, String payload) {
+        correlationId = Correlation.getCorrelationId().orElse(UUID.randomUUID().toString());
+        timestamp = Instant.now();
+        this.payloadClass = payloadClass;
+        this.payload = payload;
+    }
+
     @JsonIgnore
     public <T> T getPayloadContent() {
-        try {
-            return (T) MAPPER.readValue(payload, Class.forName(payloadClass));
-        } catch (JsonProcessingException | ClassNotFoundException e) {
-            throw new EventPayloadDeserializationException(payloadClass, e);
+        if (payloadContent == null) {
+            try {
+                payloadContent = MAPPER.readValue(payload, Class.forName(payloadClass));
+            } catch (JsonProcessingException | ClassNotFoundException e) {
+                throw new EventPayloadDeserializationException(payloadClass, e);
+            }
         }
+        return (T) payloadContent;
     }
 }
