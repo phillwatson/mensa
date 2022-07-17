@@ -1,54 +1,39 @@
 package com.hillayes.mensa.auditor.repository;
 
 import com.hillayes.mensa.auditor.domain.Payment;
-import com.hillayes.mensa.auditor.domain.PaymentStatus;
-import com.hillayes.mensa.auditor.utils.EnumUtils;
-import com.hillayes.mensa.events.events.payment.PaymentEvent;
-import com.mongodb.client.model.UpdateOptions;
-import com.mongodb.client.result.UpdateResult;
+import com.hillayes.mensa.auditor.repository.delta.DeltaStrategy;
+import com.hillayes.mensa.events.domain.EventPacket;
+import com.mongodb.bulk.BulkWriteResult;
+import com.mongodb.client.model.WriteModel;
 import lombok.extern.slf4j.Slf4j;
-import org.bson.BsonDocument;
 
 import javax.enterprise.context.ApplicationScoped;
-import java.time.Instant;
-
-import static com.mongodb.client.model.Filters.eq;
+import javax.transaction.Transactional;
+import java.util.List;
 
 @ApplicationScoped
 @Slf4j
 public class PaymentMongoRepository extends BaseMongoRepository<Payment> {
-    public void updateDelta(PaymentEvent paymentEvent) {
-        log.debug("Updating Payment delta [paymentId: {}]", paymentEvent.getPaymentId());
-
-        Payment payment = Payment.builder()
-            .id(paymentEvent.getPaymentId())
-            .payoutId(paymentEvent.getPayoutId())
-            .batchId(paymentEvent.getBatchId())
-            .payeeId(paymentEvent.getPayeeId())
-            .memo(paymentEvent.getMemo())
-            .sourceCurrency(paymentEvent.getSourceCurrency())
-            .sourceAmount(paymentEvent.getSourceAmount())
-            .status(EnumUtils.safeValueOf(PaymentStatus.values(), paymentEvent.getStatus()))
-            .build();
-
-        BsonDocument updateDoc = new BsonDocument("$set", getDelta(payment));
-        if (payment.getStatus() != null) {
-            updateDoc.put("$push",
-                new BsonDocument("statusHistory",
-                    encode(new Payment.StatusHistory(payment.getStatus(), Instant.now()))));
+    @Transactional
+    public boolean updateDelta(DeltaStrategy deltaStrategy, EventPacket event) {
+        List<WriteModel<? extends Payment>> update = deltaStrategy.mongoDelta(mongoCollection().getCodecRegistry(), event);
+        if ((update == null) || (update.isEmpty())) {
+            log.debug("Payment event no-op update [deltaStrategy: {}, eventPayload: {}]",
+                deltaStrategy.getClass().getName(), event.getPayload());
+            return false;
         }
 
-        UpdateResult updateResult = mongoCollection()
-            .updateOne(eq("_id", payment.getId()),
-                updateDoc, new UpdateOptions().upsert(true)
-            );
+        log.trace("Updating payment [size: {}]", update.size());
 
-        log.debug("Updated Payment delta [paymentId: {}, modifiedCount: {}]",
-            paymentEvent.getPaymentId(), updateResult.getModifiedCount());
-    }
+        // submit all updates in bulk
+        BulkWriteResult updateResult = mongoCollection().bulkWrite(update);
 
-    private BsonDocument getDelta(Payment payment) {
-        BsonDocument result = encode(payment);
-        return result;
+        if (log.isTraceEnabled()) {
+            log.trace("Updated payment doc [matched: {}, modified: {}, deleted: {}, inserted: {}, ack: {}]",
+                updateResult.getMatchedCount(), updateResult.getModifiedCount(),
+                updateResult.getDeletedCount(), updateResult.getInsertedCount(),
+                updateResult.wasAcknowledged());
+        }
+        return true;
     }
 }

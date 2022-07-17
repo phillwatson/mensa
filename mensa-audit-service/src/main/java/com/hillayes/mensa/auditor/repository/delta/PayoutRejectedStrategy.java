@@ -4,26 +4,23 @@ import com.hillayes.mensa.auditor.domain.Payout;
 import com.hillayes.mensa.auditor.domain.PayoutStatus;
 import com.hillayes.mensa.events.domain.EventPacket;
 import com.hillayes.mensa.events.events.payout.PayoutRejected;
+import com.mongodb.client.model.UpdateOneModel;
+import com.mongodb.client.model.WriteModel;
 import org.bson.BsonDocument;
-import org.bson.BsonInt32;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.neo4j.driver.Query;
 import org.neo4j.driver.Values;
 
-import javax.inject.Singleton;
+import javax.enterprise.context.ApplicationScoped;
+import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
-@Singleton
-public class PayoutRejectedStrategy extends DeltaStrategy {
+import static com.mongodb.client.model.Filters.eq;
+
+@ApplicationScoped
+public class PayoutRejectedStrategy extends AbstractDeltaStrategy {
     public PayoutRejectedStrategy() {
         super(PayoutRejected.class);
-    }
-
-    @Override
-    public UUID getEntityId(EventPacket event) {
-        PayoutRejected payload = event.getPayloadContent();
-        return payload.getPayoutId();
     }
 
     @Override
@@ -35,9 +32,9 @@ public class PayoutRejectedStrategy extends DeltaStrategy {
                 "MERGE (submittingPayor:Payor {id:$submittingPayorId}) " +
                 "MERGE (payoutFromPayor:Payor {id:$payoutFromPayorId}) " +
                 "MERGE (payoutToPayor:Payor {id:$payoutToPayorId}) " +
-                "MERGE (submittingPayor)-[SUBMITTED]->(payout) " +
-                "MERGE (payoutFromPayor)<-[FROM]-(payout) " +
-                "MERGE (payoutToPayor)-[TO]->(payout)"
+                "MERGE (submittingPayor)-[:SUBMITTED]->(payout) " +
+                "MERGE (payoutFromPayor)-[:FROM]->(payout) " +
+                "MERGE (payoutToPayor)<-[:TO]-(payout)"
         ).withParameters(Values.parameters(
                 "payoutId", payoutRejected.getPayoutId().toString(),
                 "submittingPayorId", payoutRejected.getPayoutPayorIds().getSubmittingPayorId().toString(),
@@ -50,7 +47,7 @@ public class PayoutRejectedStrategy extends DeltaStrategy {
     }
 
     @Override
-    public Optional<BsonDocument> mongoDelta(CodecRegistry codecRegistry, EventPacket event) {
+    public <T> List<WriteModel<? extends T>> mongoDelta(CodecRegistry codecRegistry, EventPacket event) {
         PayoutRejected payoutRejected = event.getPayloadContent();
 
         Payout payout = Payout.builder()
@@ -61,11 +58,13 @@ public class PayoutRejectedStrategy extends DeltaStrategy {
             .status(PayoutStatus.REJECTED)
             .build();
 
-        BsonDocument result = new BsonDocument("$set", encode(codecRegistry, payout));
-        result.put("$push",
+        BsonDocument update = new BsonDocument("$set", encode(codecRegistry, payout));
+        update.put("$push",
             new BsonDocument("statusHistory",
                 encode(codecRegistry, new Payout.StatusHistory(PayoutStatus.REJECTED, event.getTimestamp()))));
 
-        return Optional.of(result);
+        return List.of(new UpdateOneModel<>(
+            eq(payoutRejected.getPayoutId()), update, UPSERT_OPTION
+        ));
     }
 }

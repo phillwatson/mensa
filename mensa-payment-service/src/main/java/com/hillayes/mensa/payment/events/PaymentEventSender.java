@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.RecordMetadata;
 
 import javax.enterprise.context.ApplicationScoped;
+import java.time.Instant;
 import java.util.concurrent.Future;
 
 @ApplicationScoped
@@ -22,7 +23,11 @@ public class PaymentEventSender {
             payment.getId(), payment.getAction(), payment.getPayloadClass());
 
         String payloadClass = mutatePayloadClass(payment.getPayloadClass());
+
         EventPacket eventPacket = new EventPacket(payloadClass, payment.getPayload());
+        eventPacket.setCorrelationId(payment.getCorrelationId().toString());
+        eventPacket.setTimestamp(Instant.ofEpochMilli(payment.getTimestamp()));
+
         return eventSender.send(Topic.PAYMENT_AUDIT, eventPacket);
     }
 

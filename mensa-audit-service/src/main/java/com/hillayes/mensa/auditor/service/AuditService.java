@@ -2,8 +2,6 @@ package com.hillayes.mensa.auditor.service;
 
 import com.hillayes.mensa.auditor.repository.PaymentMongoRepository;
 import com.hillayes.mensa.auditor.repository.PaymentNeoRepository;
-import com.hillayes.mensa.auditor.repository.PayoutMongoRepository;
-import com.hillayes.mensa.auditor.repository.PayoutNeoRepository;
 import com.hillayes.mensa.auditor.repository.delta.DeltaStrategy;
 import com.hillayes.mensa.events.domain.EventPacket;
 import com.hillayes.mensa.events.domain.Topic;
@@ -11,16 +9,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.enterprise.context.ApplicationScoped;
-import java.util.List;
+import javax.enterprise.inject.Instance;
 
 @ApplicationScoped
 @RequiredArgsConstructor
 @Slf4j
 public class AuditService {
-    private final PayoutMongoRepository payoutMongoRepository;
-    private final PayoutNeoRepository payoutNeoRepository;
+    private final PaymentMongoRepository paymentMongoRepository;
+    private final PaymentNeoRepository paymentNeoRepository;
 
-    private final List<DeltaStrategy> deltaStrategies;
+    private final Instance<DeltaStrategy> deltaStrategies;
 
     public void auditEvent(Topic topic, EventPacket event) {
         log.info("Auditing PayoutEvent [topic: {}]", topic);
@@ -30,8 +28,8 @@ public class AuditService {
             .findAny()
             .ifPresentOrElse(
                 strategy -> {
-                    payoutMongoRepository.updateDelta(strategy, event);
-                    payoutNeoRepository.updateDelta(strategy, event);
+                    paymentMongoRepository.updateDelta(strategy, event);
+                    paymentNeoRepository.updateDelta(strategy, event);
                     log.debug("Audited PayoutEvent [topic: {}]", topic);
                 },
                 () ->

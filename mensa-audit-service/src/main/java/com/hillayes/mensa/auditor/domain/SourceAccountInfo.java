@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.bson.codecs.pojo.annotations.BsonId;
 
 import java.util.UUID;
 
@@ -18,7 +19,8 @@ import java.util.UUID;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SourceAccountInfo {
     @EqualsAndHashCode.Include
-    private UUID sourceAccountId; // primary key
+    @BsonId
+    private UUID id; // primary key
     private String name;
     private UUID payorId; // foreign key to PayorInfo.payorId
     private String fundingRef;

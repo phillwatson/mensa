@@ -125,6 +125,7 @@ services:
     image: mensa/audit-service:1.0.0-SNAPSHOT
     depends_on:
       - mongo
+      - neo4j
       - kafka
     environment:
       MONGODB_CONNECTION: mongodb://mensa:mensa@mongo:27017

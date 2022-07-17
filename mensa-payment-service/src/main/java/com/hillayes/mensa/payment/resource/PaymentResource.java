@@ -1,5 +1,6 @@
 package com.hillayes.mensa.payment.resource;
 
+import com.hillayes.mensa.payment.domain.PaymentAuditEvent;
 import com.hillayes.mensa.payment.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 import java.util.UUID;
 
 @Path("/payments")
@@ -20,6 +22,14 @@ import java.util.UUID;
 @Slf4j
 public class PaymentResource {
     private final PaymentService paymentService;
+
+    @GET
+    @Path("/audit")
+    public Response getPaymentAuditEvents() {
+        log.info("Looking for payment-audit-events");
+        List<PaymentAuditEvent> paymentAuditEvents = paymentService.uploadPaymentEvents();
+        return Response.ok(paymentAuditEvents.size()).build();
+    }
 
     @GET
     @Path("/audit/{id}")
