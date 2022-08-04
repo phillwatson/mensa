@@ -18,6 +18,7 @@
         <module>mensa-user-service</module>
         <module>mensa-email-service</module>
         <module>mensa-events</module>
+        <module>mensa-outbox</module>
         <module>mensa-exception</module>
         <module>mensa-executors</module>
         <module>mensa-audit-service</module>
@@ -44,6 +45,7 @@
 
         <mensa-exception-version>1.0.0-SNAPSHOT</mensa-exception-version>
         <mensa-events-version>1.0.0-SNAPSHOT</mensa-events-version>
+        <mensa-outbox-version>1.0.0-SNAPSHOT</mensa-outbox-version>
         <mensa-executors-version>1.0.0-SNAPSHOT</mensa-executors-version>
         <mensa-payment-service-version>1.0.0-SNAPSHOT</mensa-payment-service-version>
     </properties>
@@ -74,6 +76,12 @@
                 <groupId>com.hillayes</groupId>
                 <artifactId>mensa-events</artifactId>
                 <version>${mensa-events-version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.hillayes</groupId>
+                <artifactId>mensa-outbox</artifactId>
+                <version>${mensa-outbox-version}</version>
             </dependency>
 
             <dependency>

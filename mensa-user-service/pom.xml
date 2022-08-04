@@ -91,6 +91,11 @@
 
         <dependency>
             <groupId>com.hillayes</groupId>
+            <artifactId>mensa-outbox</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.hillayes</groupId>
             <artifactId>mensa-executors</artifactId>
         </dependency>
     </dependencies>

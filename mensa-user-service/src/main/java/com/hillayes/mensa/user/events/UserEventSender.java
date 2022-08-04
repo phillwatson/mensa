@@ -20,14 +20,18 @@ import java.util.concurrent.Future;
 @Slf4j
 public class UserEventSender {
     private final EventSender eventSender;
+    private final com.hillayes.mensa.outbox.service.EventSender eventSender2;
 
     public Future<RecordMetadata> sendUserCreated(User user) {
         log.debug("Sending UserCreated event [username: {}]", user.getUsername());
-        return eventSender.send(Topic.USER_CREATED, UserCreated.builder()
-            .username(user.getUsername())
-            .email(user.getEmail())
-            .dateCreated(user.getDateCreated())
-            .build());
+
+        UserCreated event = UserCreated.builder()
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .dateCreated(user.getDateCreated())
+                .build();
+        eventSender2.send(com.hillayes.mensa.outbox.domain.Topic.USER_CREATED, event);
+        return eventSender.send(Topic.USER_CREATED, event);
     }
 
     public Future<RecordMetadata> sendUserDeclined(User user) {
