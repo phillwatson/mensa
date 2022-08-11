@@ -1,4 +1,4 @@
-package com.hillayes.mensa.outbox.domain;
+package com.hillayes.mensa.outbox.repository;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -6,13 +6,16 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.hillayes.mensa.events.domain.EventPacket;
+import com.hillayes.mensa.events.domain.Topic;
+import com.hillayes.mensa.events.exceptions.EventPayloadDeserializationException;
+import com.hillayes.mensa.events.exceptions.EventPayloadSerializationException;
 import com.hillayes.mensa.executors.correlation.Correlation;
-import com.hillayes.mensa.outbox.exceptions.EventPayloadDeserializationException;
-import com.hillayes.mensa.outbox.exceptions.EventPayloadSerializationException;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -20,16 +23,18 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Table;
 import javax.persistence.Transient;
 import java.time.Instant;
 import java.util.UUID;
 
-@Entity(name="events")
+@Entity
+@Table(name="events")
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class EventPacket {
+public class EventPacketEntity implements EventPacket {
     private static final ObjectMapper MAPPER = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
@@ -46,6 +51,7 @@ public class EventPacket {
     private Instant timestamp;
 
     @Column(name="delivered_at")
+    @Setter
     private Instant deliveredAt;
 
     @Enumerated(EnumType.STRING)
@@ -60,9 +66,13 @@ public class EventPacket {
     @Transient
     private Object payloadContent;
 
-    public EventPacket(Topic topic, Object payloadObject) {
-        correlationId = Correlation.getCorrelationId().orElse(UUID.randomUUID().toString());
-        timestamp = Instant.now();
+    public EventPacketEntity(Topic topic, Object payloadObject) {
+        this(topic, payloadObject, Correlation.getCorrelationId().orElse(UUID.randomUUID().toString()), Instant.now());
+    }
+
+    public EventPacketEntity(Topic topic, Object payloadObject, String correlationId, Instant timestamp) {
+        this.correlationId = correlationId;
+        this.timestamp = timestamp;
         this.topic = topic;
 
         try {

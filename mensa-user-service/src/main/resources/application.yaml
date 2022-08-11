@@ -11,6 +11,7 @@ quarkus:
   hibernate-orm:
     database:
       default-schema: users
+
   log:
     console:
       format: "%d{yyyy-MM-dd HH:mm:ss,S} %-5p %X{correlationId} - [%c{3.}] (%t) %s%e%n"

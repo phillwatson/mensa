@@ -6,23 +6,20 @@ import com.hillayes.mensa.events.events.user.UserDeclined;
 import com.hillayes.mensa.events.events.user.UserDeleted;
 import com.hillayes.mensa.events.events.user.UserOnboarded;
 import com.hillayes.mensa.events.events.user.UserUpdated;
-import com.hillayes.mensa.events.sender.EventSender;
+import com.hillayes.mensa.outbox.sender.EventSender;
 import com.hillayes.mensa.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.producer.RecordMetadata;
 
 import javax.enterprise.context.ApplicationScoped;
-import java.util.concurrent.Future;
 
 @ApplicationScoped
 @RequiredArgsConstructor
 @Slf4j
 public class UserEventSender {
     private final EventSender eventSender;
-    private final com.hillayes.mensa.outbox.service.EventSender eventSender2;
 
-    public Future<RecordMetadata> sendUserCreated(User user) {
+    public void sendUserCreated(User user) {
         log.debug("Sending UserCreated event [username: {}]", user.getUsername());
 
         UserCreated event = UserCreated.builder()
@@ -30,22 +27,23 @@ public class UserEventSender {
                 .email(user.getEmail())
                 .dateCreated(user.getDateCreated())
                 .build();
-        eventSender2.send(com.hillayes.mensa.outbox.domain.Topic.USER_CREATED, event);
-        return eventSender.send(Topic.USER_CREATED, event);
+        eventSender.send(Topic.USER_CREATED, event);
     }
 
-    public Future<RecordMetadata> sendUserDeclined(User user) {
+    public void sendUserDeclined(User user) {
         log.debug("Sending UserDeclined event [username: {}]", user.getUsername());
-        return eventSender.send(Topic.USER_DECLINED, UserDeclined.builder()
-            .username(user.getUsername())
-            .email(user.getEmail())
-            .dateCreated(user.getDateCreated())
-            .build());
+
+        UserDeclined event = UserDeclined.builder()
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .dateCreated(user.getDateCreated())
+                .build();
+        eventSender.send(Topic.USER_DECLINED, event);
     }
 
-    public Future<RecordMetadata> sendUserOnboarded(User user) {
+    public void sendUserOnboarded(User user) {
         log.debug("Sending UserOnboarded event [username: {}]", user.getUsername());
-        return eventSender.send(Topic.USER_ONBOARDED, UserOnboarded.builder()
+        eventSender.send(Topic.USER_ONBOARDED, UserOnboarded.builder()
             .username(user.getUsername())
             .email(user.getEmail())
             .dateCreated(user.getDateCreated())
@@ -53,9 +51,9 @@ public class UserEventSender {
             .build());
     }
 
-    public Future<RecordMetadata> sendUserUpdated(User user) {
+    public void sendUserUpdated(User user) {
         log.debug("Sending UserUpdated event [username: {}]", user.getUsername());
-        return eventSender.send(Topic.USER_UPDATED, UserUpdated.builder()
+        eventSender.send(Topic.USER_UPDATED, UserUpdated.builder()
             .username(user.getUsername())
             .email(user.getEmail())
             .dateCreated(user.getDateCreated())
@@ -63,9 +61,9 @@ public class UserEventSender {
             .build());
     }
 
-    public Future<RecordMetadata> sendUserDeleted(User user) {
+    public void sendUserDeleted(User user) {
         log.debug("Sending UserDeleted event [username: {}]", user.getUsername());
-        return eventSender.send(Topic.USER_DELETED, UserDeleted.builder()
+        eventSender.send(Topic.USER_DELETED, UserDeleted.builder()
             .username(user.getUsername())
             .email(user.getEmail())
             .dateCreated(user.getDateCreated())

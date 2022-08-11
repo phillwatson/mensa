@@ -1,20 +1,14 @@
 package com.hillayes.mensa.outbox.repository;
 
-import com.hillayes.mensa.outbox.domain.EventPacket;
+import com.hillayes.mensa.events.domain.EventPacket;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
-import io.quarkus.panache.common.Page;
-import io.quarkus.panache.common.Parameters;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import java.util.stream.Stream;
+import javax.persistence.LockModeType;
+import java.util.List;
 
 @ApplicationScoped
-@NamedQueries({
-        @NamedQuery(name="EventPacket.undelivered", query = "FROM EventPacket WHERE deliveredAt IS NULL ORDER BY postedAt LIMIT :batchSize FOR UPDATE")
-})
-public class EventPacketRepository implements PanacheRepository<EventPacket> {
+public class EventPacketRepository implements PanacheRepository<EventPacketEntity> {
     /**
      * Returns the undelivered events in the order they were posted. The events are locked to prevent
      * allow update and prevent update conflicts.
@@ -22,10 +16,10 @@ public class EventPacketRepository implements PanacheRepository<EventPacket> {
      * @param batchSize the max number of events to be returned.
      * @return a stream of undelivered events.
      */
-    public Stream<EventPacket> listUndelivered(int batchSize) {
-        return find("#EventPacket.undelivered", Parameters.with("batchSize", batchSize))
-                .page(Page.ofSize(batchSize))
-                .firstPage()
-                .stream();
+    public List<EventPacketEntity> listUndelivered(int batchSize) {
+        return find("FROM EventPacket WHERE deliveredAt IS NULL ORDER BY timestamp")
+                .withLock(LockModeType.PESSIMISTIC_WRITE)
+                .page(0, batchSize)
+                .list();
     }
 }

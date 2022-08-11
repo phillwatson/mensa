@@ -27,6 +27,11 @@ quarkus:
       "com.hillayes":
         level: DEBUG
 
+kafka:
+  bootstrap:
+    servers: kafka:9092
+
+
 mensa:
   events:
     group: email

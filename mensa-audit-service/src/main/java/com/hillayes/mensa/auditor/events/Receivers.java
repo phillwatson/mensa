@@ -2,33 +2,25 @@ package com.hillayes.mensa.auditor.events;
 
 import com.hillayes.mensa.auditor.service.AuditService;
 import com.hillayes.mensa.events.domain.EventPacket;
-import com.hillayes.mensa.events.domain.Topic;
-import com.hillayes.mensa.events.receiver.ConsumerFactory;
-import com.hillayes.mensa.events.receiver.TopicListener;
-import io.quarkus.runtime.StartupEvent;
+import io.smallrye.reactive.messaging.annotations.Blocking;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.reactive.messaging.Incoming;
 
-import javax.enterprise.event.Observes;
 import javax.inject.Singleton;
 
 @Singleton
 @RequiredArgsConstructor
 @Slf4j
 public class Receivers {
-    private final ConsumerFactory consumerFactory;
     private final AuditService auditService;
 
-    void onStart(@Observes StartupEvent ev) {
-        log.info("Adding event listeners");
+    @Incoming("payment_audit")
+    @Blocking
+    public void paymentAuditTopicListener(EventPacket event) {
+        log.info("Received Audit Event [topic: {}, correlationId: {}, timestamp: {}, payloadClass: {}]",
+            event.getTopic(), event.getCorrelationId(), event.getTimestamp(), event.getPayloadClass());
 
-        consumerFactory.addTopicListener(
-            new TopicListener(Topic.PAYMENT_AUDIT, (EventPacket event) -> {
-                log.info("Received Audit Event [topic: {}, correlationId: {}, timestamp: {}, payloadClass: {}]",
-                    Topic.PAYMENT_AUDIT, event.getCorrelationId(), event.getTimestamp(), event.getPayloadClass());
-
-                auditService.auditEvent(Topic.PAYMENT_AUDIT, event);
-            })
-        );
+        auditService.auditEvent(event.getTopic(), event);
     }
 }

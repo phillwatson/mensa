@@ -38,10 +38,18 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-kafka-client</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-scheduler</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.hillayes</groupId>
             <artifactId>mensa-executors</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.hillayes</groupId>
+            <artifactId>mensa-events</artifactId>
         </dependency>
 
         <dependency>

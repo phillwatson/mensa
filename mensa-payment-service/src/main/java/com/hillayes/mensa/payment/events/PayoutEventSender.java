@@ -1,6 +1,6 @@
 package com.hillayes.mensa.payment.events;
 
-import com.hillayes.mensa.events.sender.EventSender;
+import com.hillayes.mensa.outbox.sender.EventSender;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

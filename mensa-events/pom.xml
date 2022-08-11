@@ -35,6 +35,7 @@
         <dependency>
             <groupId>com.hillayes</groupId>
             <artifactId>mensa-executors</artifactId>
+            <version>${mensa-executors-version}</version>
         </dependency>
 
         <dependency>

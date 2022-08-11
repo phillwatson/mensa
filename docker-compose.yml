@@ -176,6 +176,8 @@ services:
       QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://db:5432/mensa
       QUARKUS_DATASOURCE_USERNAME: mensa
       QUARKUS_DATASOURCE_PASSWORD: mensa
+      QUARKUS_HIBERNATE_ORM_LOG_SQL: false
+      QUARKUS_HIBERNATE_ORM_LOG_BIND_PARAMETERS: false
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     networks:
       - mensa-db-network

@@ -38,7 +38,7 @@
 
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
-        <quarkus.platform.version>2.9.2.Final</quarkus.platform.version>
+        <quarkus.platform.version>2.11.2.Final</quarkus.platform.version>
         <quarkus.container-image.build>true</quarkus.container-image.build>
         <quarkus.container-image.group>${project.parent.artifactId}</quarkus.container-image.group>
         <quarkus.jib.jvm-additional-arguments>-agentlib:jdwp=transport=dt_socket\,server=y\,suspend=n\,address=*:5005</quarkus.jib.jvm-additional-arguments>
