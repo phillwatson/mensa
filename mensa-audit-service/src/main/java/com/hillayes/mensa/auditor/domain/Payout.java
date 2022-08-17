@@ -33,7 +33,7 @@ public class Payout {
     private PayoutType payoutType;
     private PayoutStatus status;
     private Instant statusLastUpdateTimestamp;
-    private List<Payment.StatusHistory> statusHistory;
+    private List<Payout.StatusHistory> statusHistory;
 
     private Instant submittedDateTime;
     private Instant quotedDateTime;
@@ -55,6 +55,8 @@ public class Payout {
     private String quotedPrincipal;
     private String instructedPrincipal;
     private String withdrawnPrincipal;
+
+    private String withdrawalReason;
 
     private PayoutSchedule schedule;
     private List<Batch> batches;

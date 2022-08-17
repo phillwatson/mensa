@@ -6,19 +6,15 @@ quarkus:
     jdbc:
       url: jdbc:postgresql://db:5432/mensa
   flyway:
-    baseline-on-migrate: true
     migrate-at-start: true
     schemas: users
   hibernate-orm:
     database:
       default-schema: users
+
   log:
     console:
       format: "%d{yyyy-MM-dd HH:mm:ss,S} %-5p %X{correlationId} - [%c{3.}] (%t) %s%e%n"
     category:
       "com.hillayes":
         level: DEBUG
-
-mensa:
-  events:
-    group: user

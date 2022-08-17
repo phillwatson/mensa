@@ -1,11 +1,10 @@
 package com.hillayes.mensa.auditor.repository;
 
-import com.hillayes.mensa.events.events.payment.PaymentEvent;
+import com.hillayes.mensa.auditor.repository.delta.DeltaStrategy;
+import com.hillayes.mensa.events.domain.EventPacket;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.neo4j.driver.Driver;
-import org.neo4j.driver.Query;
-import org.neo4j.driver.Values;
 
 import javax.enterprise.context.ApplicationScoped;
 
@@ -15,27 +14,21 @@ import javax.enterprise.context.ApplicationScoped;
 public class PaymentNeoRepository {
     private final Driver driver;
 
-    public void updateDelta(PaymentEvent paymentEvent) {
-        Query createPayoutNode = new Query(
-            "MERGE (payout:Payout {id:$payoutId}) " +
-                "MERGE (payee:Payee {id:$payeeId}) " +
-                "MERGE (payee)<-[r:RECEIVES]-(payout) " +
-                " ON CREATE SET r.amount = $amount, r.currency = $currency " +
-                " ON MATCH  SET r.amount = coalesce(r.amount, $amount), r.currency = coalesce(r.currency, $currency) " +
-                "RETURN payee.id, type(r), payout.id"
-        ).withParameters(Values.parameters(
-                "payoutId", paymentEvent.getPayoutId().toString(),
-                "payeeId", paymentEvent.getPayeeId().toString(),
-                "amount", paymentEvent.getSourceAmount(),
-                "currency", paymentEvent.getSourceCurrency()
-            )
-        );
+    public boolean updateDelta(DeltaStrategy deltaStrategy, EventPacket event) {
+        return deltaStrategy.neoDelta(event)
+            .map(query -> {
+                log.trace("Updating payment [{}]", query);
 
-        driver.session().writeTransaction(tx -> {
-            tx.run(createPayoutNode).forEachRemaining(r ->
-                log.debug("Cypher result: {}", r.asMap())
-            );
-            return null;
-        });
+                return driver.session().writeTransaction(tx -> {
+                    tx.run(query).forEachRemaining(r ->
+                        log.trace("Updated payment [result: {}]", r.asMap())
+                    );
+                    return true;
+                });
+            })
+            .orElseGet(() -> {
+                log.trace("No delta generated");
+                return false;
+            });
     }
 }

@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.bson.codecs.pojo.annotations.BsonId;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -19,6 +20,7 @@ import java.util.UUID;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Batch {
     @EqualsAndHashCode.Include
+    @BsonId
     private UUID id; // primary key
     private UUID payoutId; // foreign key to payout.payoutId
     private UUID sourceAccountId; // foreign key to SourceAccountInfo.sourceAccountId

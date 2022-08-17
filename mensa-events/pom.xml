@@ -27,14 +27,10 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-kafka-client</artifactId>
         </dependency>
+
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-jackson</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.hillayes</groupId>
-            <artifactId>mensa-executors</artifactId>
         </dependency>
 
         <dependency>
@@ -46,6 +42,11 @@
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.hillayes</groupId>
+            <artifactId>mensa-executors</artifactId>
         </dependency>
     </dependencies>
 </project>

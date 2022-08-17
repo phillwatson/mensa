@@ -1,6 +1,5 @@
 package com.hillayes.mensa.events.events.user;
 
-import com.hillayes.mensa.events.domain.Event;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,7 +12,7 @@ import java.time.Instant;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserOnboarded implements Event {
+public class UserOnboarded {
     @NotNull
     private String username;
 

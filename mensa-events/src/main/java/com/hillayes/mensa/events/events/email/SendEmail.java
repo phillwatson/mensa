@@ -1,6 +1,5 @@
 package com.hillayes.mensa.events.events.email;
 
-import com.hillayes.mensa.events.domain.Event;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,7 +11,7 @@ import javax.validation.constraints.NotNull;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SendEmail implements Event {
+public class SendEmail {
     @NotNull
     private String toAddress;
 

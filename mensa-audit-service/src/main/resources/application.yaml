@@ -15,7 +15,3 @@ quarkus:
     category:
       "com.hillayes":
         level: DEBUG
-
-mensa:
-  events:
-    group: audit
