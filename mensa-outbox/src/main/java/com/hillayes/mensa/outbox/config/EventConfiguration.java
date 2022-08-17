@@ -1,7 +1,9 @@
 package com.hillayes.mensa.outbox.config;
 
-import com.hillayes.mensa.outbox.serializers.EventPacketSerializer;
+import com.hillayes.mensa.events.serializers.EventPacketSerializer;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -12,13 +14,13 @@ import java.util.Properties;
 public class EventConfiguration {
     @Produces()
     @ProducerConfig
-    public Properties getProducerConfig(@ConfigProperty(name="kafka.producer.client", defaultValue = "mensa") final String clientId,
-                                        @ConfigProperty(name="kafka.bootstrap.servers", defaultValue = "kafka:9092") final String bootstrapServers,
-                                        @ConfigProperty(name="kafka.producer.lingerMs", defaultValue = "0") final String lingerMs,
-                                        @ConfigProperty(name="kafka.producer.acksConfig", defaultValue = "all") final String acksConfig,
-                                        @ConfigProperty(name="kafka.producer.maxInFlightRequestsPerConnection", defaultValue = "3") final Integer maxInFlightRequestsPerConnection,
-                                        @ConfigProperty(name="kafka.producer.batchSizeConfig", defaultValue = "16384") final Integer batchSizeConfig,
-                                        @ConfigProperty(name="kafka.producer.maxBlockMsConfig", defaultValue = "60000") final Integer maxBlockMsConfig) {
+    public Properties getProducerConfig(@ConfigProperty(name = "kafka.producer.client", defaultValue = "mensa") final String clientId,
+                                        @ConfigProperty(name = "kafka.bootstrap.servers", defaultValue = "kafka:9092") final String bootstrapServers,
+                                        @ConfigProperty(name = "kafka.producer.lingerMs", defaultValue = "0") final String lingerMs,
+                                        @ConfigProperty(name = "kafka.producer.acksConfig", defaultValue = "all") final String acksConfig,
+                                        @ConfigProperty(name = "kafka.producer.maxInFlightRequestsPerConnection", defaultValue = "3") final Integer maxInFlightRequestsPerConnection,
+                                        @ConfigProperty(name = "kafka.producer.batchSizeConfig", defaultValue = "16384") final Integer batchSizeConfig,
+                                        @ConfigProperty(name = "kafka.producer.maxBlockMsConfig", defaultValue = "60000") final Integer maxBlockMsConfig) {
         Properties config = new Properties();
         config.put(org.apache.kafka.clients.producer.ProducerConfig.CLIENT_ID_CONFIG, clientId);
         config.put(org.apache.kafka.clients.producer.ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);

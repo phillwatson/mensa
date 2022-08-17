@@ -19,7 +19,7 @@ public class ProducerFactory {
 
     private final AtomicBoolean shutdown = new AtomicBoolean(false);
 
-    private Producer<String, EventPacket> producer;
+    private volatile Producer<String, EventPacket> producer;
 
     public ProducerFactory(@ProducerConfig Properties producerConfig) {
         this.producerConfig = producerConfig;
@@ -31,7 +31,11 @@ public class ProducerFactory {
         }
 
         if (producer == null) {
-            producer = new KafkaProducer<>(producerConfig);
+            synchronized (this) {
+                if (producer == null) {
+                    producer = new KafkaProducer<>(producerConfig);
+                }
+            }
         }
         return producer;
     }

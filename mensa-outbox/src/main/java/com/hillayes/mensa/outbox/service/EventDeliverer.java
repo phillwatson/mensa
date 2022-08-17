@@ -1,23 +1,30 @@
 package com.hillayes.mensa.outbox.service;
 
 import com.hillayes.mensa.events.domain.EventPacket;
-import com.hillayes.mensa.events.domain.Topic;
-import com.hillayes.mensa.outbox.repository.EventPacketEntity;
-import com.hillayes.mensa.outbox.repository.EventPacketRepository;
+import com.hillayes.mensa.outbox.repository.EventEntity;
+import com.hillayes.mensa.outbox.repository.EventRepository;
 import com.hillayes.mensa.outbox.sender.ProducerFactory;
 import io.quarkus.scheduler.Scheduled;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
+import org.apache.kafka.common.header.Header;
+import org.apache.kafka.common.header.Headers;
+import org.eclipse.microprofile.reactive.messaging.Incoming;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.persistence.LockModeType;
 import javax.transaction.Transactional;
 import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -25,60 +32,110 @@ import java.util.stream.Collectors;
 @Slf4j
 public class EventDeliverer {
     private final ProducerFactory producerFactory;
-    private final EventPacketRepository eventPacketRepository;
+    private final EventRepository eventRepository;
+
+    private static final AtomicBoolean MUTEX = new AtomicBoolean();
 
     /**
      * A scheduled service to read pending events from the event outbox table and
      * send them to the message broker.
      */
-    @Scheduled(cron = "${mense.events.cron:1/5 * * * * ?}", concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
-    @Transactional
-    public void deliverEvents() {
-        log.trace("Event delivery started");
-        List<EventPacketEntity> events = eventPacketRepository.listUndelivered(50);
-        log.trace("Found events for delivery [size: {}]", events.size());
-
-        List<EventRecord> records = events.stream()
-                .map(packet -> send(packet.getTopic(), null, packet))
-                .collect(Collectors.toList());
-
-        log.trace("Delivered events [size: {}]", records.size());
-        records.stream()
-                .filter(record -> !record.isError())
-                .forEach(record -> {
-                    EventPacketEntity packet = record.getEventPacket();
-                    packet.setDeliveredAt(Instant.now());
-                    eventPacketRepository.persist(packet);
-                });
-
-        // wait for events to complete
-        log.trace("Event delivery complete");
+    @Scheduled(cron = "${mensa.events.cron:1/5 * * * * ?}", concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
+    public void deliverEvents() throws Exception {
+        if (!MUTEX.compareAndSet(false, true)) {
+            return;
+        }
+        try {
+            _deliverEvents();
+        } finally {
+            log.trace("Event delivery complete");
+            MUTEX.set(false);
+        }
     }
 
-    private EventRecord send(Topic topic, String key, EventPacketEntity eventPacket) {
-        EventRecord.EventRecordBuilder result =
-                EventRecord.builder().eventPacket(eventPacket);
+    /**
+     * Sends any undelivered events to the message broker, and marks them as delivered.
+     */
+    @Transactional(rollbackOn = Exception.class)
+    protected void _deliverEvents() throws Exception {
+        log.trace("Event delivery started");
+        List<EventEntity> events = eventRepository.listUndelivered(25);
+        log.trace("Found events for delivery [size: {}]", events.size());
 
-        try {
-            log.trace("Delivering event [id: {}, topic: {}, payload: {}]",
-                    eventPacket.getId(), eventPacket.getTopic(), eventPacket.getPayloadClass());
-
-            ProducerRecord<String, EventPacket> record = new ProducerRecord<>(topic.topicName(), key, eventPacket);
-            producerFactory.getProducer().send(record);
-        } catch (Exception e) {
-            log.warn("Failed to deliver event [id: {}, topic: {}, payload: {}]",
-                    eventPacket.getId(), eventPacket.getTopic(), eventPacket.getPayloadClass());
-            result.error(true);
+        if (events.isEmpty()) {
+            return;
         }
 
-        return result.build();
+        Producer<String, EventPacket> producer = producerFactory.getProducer();
+        List<EventRecord> records = events.stream()
+                .map(event -> send(producer, event))
+                .collect(Collectors.toList());
+
+        for (EventRecord record : records) {
+            try {
+                // block until event delivery is complete
+                record.getEventResponse().get();
+
+                // record the delivery time
+                EventEntity event = record.getEvent();
+                event.setDeliveredAt(Instant.now());
+                eventRepository.persist(event);
+            } catch (InterruptedException | ExecutionException e) {
+                EventEntity event = record.getEvent();
+                log.error("Event delivery failed [id: {}, topic: {}, payload: {}]",
+                        event.getId(), event.getTopic(), event.getPayloadClass());
+                throw e;
+            }
+        }
+    }
+
+    /**
+     * Listens for events that have failed during their delivery. The event's retry-count
+     * is incremented and, if the number of retries does not exceed the max, the event is
+     * returned to the queue for delivery.
+     * @param record the record of the failed event.
+     */
+    @Incoming("retry-topic")
+    @Transactional
+    public void deadLetterTopicListener(ConsumerRecord<String, EventPacket> record) {
+        Headers headers = record.headers();
+        String reason = getHeader(headers, "dead-letter-reason");
+        String cause = getHeader(headers, "dead-letter-cause");
+
+        EventPacket event = record.value();
+        int retryCount = event.getRetryCount();
+
+        if (retryCount < 3) {
+            log.debug("Reposting event [topic: {}, retryCount: {}, reason: {}, cause: {}]",
+                    event.getTopic(), retryCount, reason, cause);
+
+            EventEntity entity = eventRepository.findById(event.getId(), LockModeType.PESSIMISTIC_WRITE);
+            entity.setRetryCount(retryCount + 1);
+            entity.setDeliveredAt(null);
+            eventRepository.persist(entity);
+        } else {
+            log.error("Failed to deliver event [id: {}, topic: {}, retryCount: {}, reason: {}, cause: {}]",
+                    event.getId(), event.getTopic(), retryCount, reason, cause);
+        }
+    }
+
+    private EventRecord send(Producer<String, EventPacket> producer, EventEntity event) {
+        ProducerRecord<String, EventPacket> record = new ProducerRecord<>(event.getTopic().topicName(), null, event.toEntityPacket());
+        return EventRecord.builder()
+                .event(event)
+                .eventResponse(producer.send(record))
+                .build();
+    }
+
+    private String getHeader(Headers headers, String key) {
+        Header header = headers.lastHeader(key);
+        return (header == null) ? null:new String(header.value());
     }
 
     @Builder
     @Getter
     private static class EventRecord {
-        private EventPacketEntity eventPacket;
+        private EventEntity event;
         private Future<RecordMetadata> eventResponse;
-        private boolean error;
     }
 }

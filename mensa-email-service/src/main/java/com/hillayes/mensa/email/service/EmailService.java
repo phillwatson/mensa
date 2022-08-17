@@ -14,6 +14,8 @@ public class EmailService {
     public void sendEmail(UserCreated userCreated) {
         log.info("Sending user-created email [username: {}, email: {}]",
             userCreated.getUsername(), userCreated.getEmail());
+
+        throw new RuntimeException();
     }
 
     public void sendEmail(UserOnboarded userOnboarded) {

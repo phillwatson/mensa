@@ -1,1 +1,1 @@
-CREATE SCHEMA IF NOT EXISTS email;
+CREATE SCHEMA IF NOT EXISTS ${flyway:defaultSchema};

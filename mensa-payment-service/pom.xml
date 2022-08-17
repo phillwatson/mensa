@@ -61,22 +61,13 @@
             <groupId>com.hillayes</groupId>
             <artifactId>mensa-exception</artifactId>
         </dependency>
-
         <dependency>
             <groupId>com.hillayes</groupId>
             <artifactId>mensa-events</artifactId>
-            <version>${mensa-events-version}</version>
         </dependency>
         <dependency>
             <groupId>com.hillayes</groupId>
             <artifactId>mensa-outbox</artifactId>
-            <version>${mensa-outbox-version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.hillayes</groupId>
-            <artifactId>mensa-executors</artifactId>
-            <version>${mensa-executors-version}</version>
         </dependency>
     </dependencies>
 

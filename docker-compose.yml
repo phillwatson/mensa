@@ -30,6 +30,7 @@ services:
         max-file: "1"
 
   kafka:
+    # view topics: kafka-console-consumer --bootstrap-server kafka:9092 --topic user_created --from-beginning
     restart: unless-stopped
     image: confluentinc/cp-kafka:5.3.1
     depends_on:

@@ -48,8 +48,8 @@
             <artifactId>quarkus-jdbc-postgresql</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.smallrye.reactive</groupId>
-            <artifactId>smallrye-reactive-messaging-api</artifactId>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-smallrye-reactive-messaging-kafka</artifactId>
         </dependency>
 
         <dependency>
@@ -61,7 +61,6 @@
         <dependency>
             <groupId>com.hillayes</groupId>
             <artifactId>mensa-events</artifactId>
-            <version>${mensa-events-version}</version>
         </dependency>
     </dependencies>
 

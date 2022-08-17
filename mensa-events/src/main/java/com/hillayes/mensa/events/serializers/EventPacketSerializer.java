@@ -1,4 +1,4 @@
-package com.hillayes.mensa.outbox.serializers;
+package com.hillayes.mensa.events.serializers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hillayes.mensa.events.domain.EventPacket;
