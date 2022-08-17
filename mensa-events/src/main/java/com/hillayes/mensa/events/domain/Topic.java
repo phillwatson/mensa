@@ -11,7 +11,9 @@ public enum Topic {
     USER_UPDATED("User profile has been updated."),
     USER_DELETED("User profile has been deleted."),
 
-    PAYMENT_AUDIT("Auditable action on a payment.");
+    PAYMENT_AUDIT("Auditable action on a payment."),
+
+    EVENT_HOSPITAL("The dead-letter queue for failed events.");
 
     private String summary;
 

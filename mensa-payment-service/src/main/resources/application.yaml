@@ -6,7 +6,6 @@ quarkus:
     jdbc:
       url: jdbc:postgresql://db:5432/mensa
   flyway:
-    baseline-on-migrate: true
     migrate-at-start: true
     schemas: payment
   hibernate-orm:
@@ -19,7 +18,3 @@ quarkus:
     category:
       "com.hillayes":
         level: DEBUG
-
-mensa:
-  events:
-    group: payment

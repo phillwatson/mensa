@@ -30,6 +30,7 @@ services:
         max-file: "1"
 
   kafka:
+    # view topics: kafka-console-consumer --bootstrap-server kafka:9092 --topic user_created --from-beginning
     restart: unless-stopped
     image: confluentinc/cp-kafka:5.3.1
     depends_on:
@@ -125,7 +126,6 @@ services:
     image: mensa/audit-service:1.0.0-SNAPSHOT
     depends_on:
       - mongo
-      - neo4j
       - kafka
     environment:
       MONGODB_CONNECTION: mongodb://mensa:mensa@mongo:27017
@@ -176,6 +176,8 @@ services:
       QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://db:5432/mensa
       QUARKUS_DATASOURCE_USERNAME: mensa
       QUARKUS_DATASOURCE_PASSWORD: mensa
+      QUARKUS_HIBERNATE_ORM_LOG_SQL: false
+      QUARKUS_HIBERNATE_ORM_LOG_BIND_PARAMETERS: false
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     networks:
       - mensa-db-network

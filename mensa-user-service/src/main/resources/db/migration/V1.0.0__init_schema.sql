@@ -1,6 +1,6 @@
-CREATE SCHEMA IF NOT EXISTS users;
+CREATE SCHEMA IF NOT EXISTS ${flyway:defaultSchema};
 
-CREATE TABLE IF NOT EXISTS users.user (
+CREATE TABLE IF NOT EXISTS ${flyway:defaultSchema}.user (
   id uuid PRIMARY KEY,
   username varchar(256) NOT NULL UNIQUE,
   password_hash varchar(256) NOT NULL,

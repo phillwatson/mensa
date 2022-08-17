@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.transaction.Transactional;
 import javax.ws.rs.BadRequestException;
 import java.time.Instant;
 import java.util.Collection;
@@ -23,6 +24,7 @@ public class UserService {
     private final PasswordCrypto passwordCrypto;
     private final UserEventSender userEventSender;
 
+    @Transactional
     public User createUser(String username, char[] password, String email) {
         log.info("Creating user [username: {}]", username);
         User user = userRepository.save(User.builder()
@@ -37,6 +39,7 @@ public class UserService {
         return user;
     }
 
+    @Transactional
     public Optional<User> onboardUser(UUID id) {
         log.info("Onboard user [id: {}]", id);
 

@@ -1,4 +1,4 @@
-package com.hillayes.mensa.events.config;
+package com.hillayes.mensa.outbox.config;
 
 import javax.inject.Qualifier;
 import java.lang.annotation.Retention;
@@ -13,5 +13,5 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Qualifier
 @Retention(RUNTIME)
 @Target({METHOD, FIELD, PARAMETER, TYPE})
-public @interface ProducerBean {
+public @interface ProducerConfig {
 }

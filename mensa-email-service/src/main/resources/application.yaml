@@ -5,17 +5,9 @@ quarkus:
     password: mensa
     jdbc:
       url: jdbc:postgresql://db:5432/mensa
-"%test":
-  quarkus:
-    datasource:
-      jdbc:
-        url: jdbc:postgresql://localhost:5432/mensa
-
   flyway:
-    baseline-on-migrate: true
     migrate-at-start: true
     schemas: email
-
   hibernate-orm:
     database:
       default-schema: email
@@ -26,11 +18,20 @@ quarkus:
     category:
       "com.hillayes":
         level: DEBUG
+      "org.eclipse.microprofile.reactive.messaging":
+        level: DEBUG
+      "io.quarkus.kafka.client":
+        level: DEBUG
+
+mp:
+  messaging:
+    incoming:
+      user_created:
+        failure-strategy: dead-letter-queue
+        dead-letter-queue:
+          topic: retry-topic
 
 mensa:
-  events:
-    group: email
-
   emails:
     user-created:
       template: user-created.email
